@@ -1,0 +1,21 @@
+# VeloList Configuration
+
+# Message shown to players who are not on the whitelist.
+# Supports legacy colour codes using '&'.
+kick-message: "&cYou are not whitelisted on this server."
+
+# Global whitelist toggle.
+# When true, the whitelist is enforced on every backend server unless a server-specific
+# override sets it to false.  When false, the whitelist is disabled globally unless a
+# server-specific override sets it to true.
+whitelist-enabled: true
+
+# Per-server overrides.
+# Keys are the server names as defined in velocity.toml.
+# A value of 'true' enables the whitelist for that server regardless of the global toggle.
+# A value of 'false' disables the whitelist for that server regardless of the global toggle.
+# Servers not listed here inherit the 'whitelist-enabled' value above.
+servers:
+  # lobby: false
+  # survival: true
+  # creative: true
