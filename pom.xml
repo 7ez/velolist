@@ -89,17 +89,17 @@
             <version>2.2.224</version>
         </dependency>
 
-        <!-- SnakeYAML for config.yml parsing (shaded into the jar) -->
+        <!-- night-config TOML parser for config.toml parsing (shaded into the jar) -->
         <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>2.2</version>
+            <groupId>com.electronwill.night-config</groupId>
+            <artifactId>toml</artifactId>
+            <version>3.6.7</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Shade plugin: bundles H2 and SnakeYAML into the plugin jar.
+            <!-- Shade plugin: bundles H2 and night-config into the plugin jar.
                  The compile-time Velocity API stubs are excluded so that only
                  the plugin's own classes and the shaded libraries end up in the jar. -->
             <plugin>
@@ -129,8 +129,8 @@
                                     <shadedPattern>com.aochi.velolist.libs.h2</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>org.yaml.snakeyaml</pattern>
-                                    <shadedPattern>com.aochi.velolist.libs.snakeyaml</shadedPattern>
+                                    <pattern>com.electronwill.nightconfig</pattern>
+                                    <shadedPattern>com.aochi.velolist.libs.nightconfig</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  *   /velolist list   [server|global]            – list whitelisted players
  *   /velolist on     [server|global]            – enable whitelist
  *   /velolist off    [server|global]            – disable whitelist
- *   /velolist reload                            – reload config.yml
+ *   /velolist reload                            – reload config.toml
  * </pre>
  *
  * <p>All subcommands require the {@code velolist.admin} permission.</p>
@@ -220,7 +220,7 @@ public class WhitelistCommand implements SimpleCommand {
         }
 
         try {
-            plugin.getPluginConfig().save(plugin.getDataDirectory().resolve("config.yml"));
+            plugin.getPluginConfig().save(plugin.getDataDirectory().resolve("config.toml"));
             source.sendMessage(ok("Whitelist " + action + " for &e" + scope + "&a."));
         } catch (IOException e) {
             source.sendMessage(err("Config saved in memory but could not be written to disk: " + e.getMessage()));

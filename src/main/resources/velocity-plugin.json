@@ -3,6 +3,6 @@
   "name": "VeloList",
   "version": "1.0.0",
   "description": "Cross-proxy whitelist plugin for Velocity supporting online and offline mode players",
-  "authors": ["aochi"],
+  "authors": ["Aochi"],
   "main": "com.aochi.velolist.VeloList"
 }

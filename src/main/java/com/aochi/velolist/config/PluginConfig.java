@@ -1,20 +1,21 @@
 package com.aochi.velolist.config;
 
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
+import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.core.Config;
+import com.electronwill.nightconfig.toml.TomlParser;
+import com.electronwill.nightconfig.toml.TomlWriter;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Holds the runtime configuration for VeloList.
  *
- * <p>Configuration is loaded from {@code config.yml} in the plugin data directory.
+ * <p>Configuration is loaded from {@code config.toml} in the plugin data directory.
  * A default config is written on first run.  All changes made via commands are
  * persisted back to disk immediately.</p>
  */
@@ -30,37 +31,32 @@ public class PluginConfig {
     // -------------------------------------------------------------------------
 
     /**
-     * Loads a {@link PluginConfig} from the given YAML file.
+     * Loads a {@link PluginConfig} from the given TOML file.
      * Returns a default config if the file is missing or cannot be parsed.
      */
-    @SuppressWarnings("unchecked")
     public static PluginConfig load(Path file) throws IOException {
         PluginConfig config = new PluginConfig();
         if (!Files.exists(file)) {
             return config;
         }
-        Yaml yaml = new Yaml();
-        try (InputStream in = Files.newInputStream(file)) {
-            Object raw = yaml.load(in);
-            if (!(raw instanceof Map)) {
-                return config;
-            }
-            Map<String, Object> data = (Map<String, Object>) raw;
+        try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+            CommentedConfig raw = new TomlParser().parse(reader);
 
-            if (data.containsKey("kick-message")) {
-                config.kickMessage = String.valueOf(data.get("kick-message"));
+            String kickMsg = raw.get("kick-message");
+            if (kickMsg != null) {
+                config.kickMessage = kickMsg;
             }
-            if (data.containsKey("whitelist-enabled")) {
-                Object val = data.get("whitelist-enabled");
-                if (val instanceof Boolean) {
-                    config.whitelistEnabled = (Boolean) val;
-                }
+
+            Boolean enabled = raw.get("whitelist-enabled");
+            if (enabled != null) {
+                config.whitelistEnabled = enabled;
             }
-            Object serversRaw = data.get("servers");
-            if (serversRaw instanceof Map) {
-                ((Map<?, ?>) serversRaw).forEach((k, v) -> {
-                    if (k instanceof String && v instanceof Boolean) {
-                        config.servers.put((String) k, (Boolean) v);
+
+            Config serversSection = raw.get("servers");
+            if (serversSection != null) {
+                serversSection.valueMap().forEach((key, value) -> {
+                    if (value instanceof Boolean) {
+                        config.servers.put(key, (Boolean) value);
                     }
                 });
             }
@@ -69,21 +65,19 @@ public class PluginConfig {
     }
 
     /**
-     * Saves the current configuration back to {@code file}.
+     * Saves the current configuration back to {@code file} in TOML format.
      */
     public void save(Path file) throws IOException {
-        DumperOptions opts = new DumperOptions();
-        opts.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        opts.setPrettyFlow(true);
-        Yaml yaml = new Yaml(opts);
-
-        Map<String, Object> data = new LinkedHashMap<>();
-        data.put("kick-message", kickMessage);
-        data.put("whitelist-enabled", whitelistEnabled);
-        data.put("servers", servers.isEmpty() ? new LinkedHashMap<>() : new LinkedHashMap<>(servers));
-
-        try (Writer writer = new OutputStreamWriter(Files.newOutputStream(file), StandardCharsets.UTF_8)) {
-            yaml.dump(data, writer);
+        CommentedConfig cfg = CommentedConfig.inMemory();
+        cfg.set("kick-message", kickMessage);
+        cfg.set("whitelist-enabled", whitelistEnabled);
+        if (!servers.isEmpty()) {
+            CommentedConfig serversSection = CommentedConfig.inMemory();
+            servers.forEach(serversSection::set);
+            cfg.set("servers", serversSection);
+        }
+        try (Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+            new TomlWriter().write(cfg, writer);
         }
     }
 

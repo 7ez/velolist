@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutionException;
     name = "VeloList",
     version = "1.0.0",
     description = "Cross-proxy whitelist plugin supporting online and offline mode players",
-    authors = {"aochi"}
+    authors = {"Aochi"}
 )
 public class VeloList {
 
@@ -91,7 +91,8 @@ public class VeloList {
             new WhitelistCommand(this, databaseManager, server)
         );
 
-        logger.info("VeloList {} has been enabled.", "1.0.0");
+        Plugin annotation = getClass().getAnnotation(Plugin.class);
+        logger.info("VeloList {} has been enabled.", annotation != null ? annotation.version() : "unknown");
     }
 
     @Subscribe
@@ -107,14 +108,14 @@ public class VeloList {
     // -------------------------------------------------------------------------
 
     /**
-     * Loads (or reloads) {@code config.yml} from the data directory.
+     * Loads (or reloads) {@code config.toml} from the data directory.
      * The default config is copied from the jar if the file does not yet exist.
      */
     public void loadConfig() {
-        Path configFile = dataDirectory.resolve("config.yml");
+        Path configFile = dataDirectory.resolve("config.toml");
         try {
             if (!Files.exists(configFile)) {
-                try (InputStream in = getClass().getResourceAsStream("/config.yml")) {
+                try (InputStream in = getClass().getResourceAsStream("/config.toml")) {
                     if (in != null) {
                         Files.copy(in, configFile);
                     }
@@ -122,7 +123,7 @@ public class VeloList {
             }
             pluginConfig = PluginConfig.load(configFile);
         } catch (IOException e) {
-            logger.error("Failed to load config.yml – using defaults", e);
+            logger.error("Failed to load config.toml – using defaults", e);
             pluginConfig = new PluginConfig();
         }
     }
