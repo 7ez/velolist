@@ -10,12 +10,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Subscribe {
 
-    /**
-     * @deprecated Use {@link #priority()} instead.
-     */
-    @Deprecated
-    PostOrder order() default PostOrder.NORMAL;
-
     short priority() default 0;
 
     boolean async() default true;
