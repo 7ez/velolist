@@ -13,21 +13,11 @@
     <description>Cross-proxy whitelist plugin for Velocity supporting online and offline mode players</description>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!--
-      Canonical build: velocity-api is fetched from PaperMC's public Maven repository.
-      The velocity-api dependency (scope=provided) pulls in adventure and Guice transitively,
-      so they do not need to be listed separately.
-
-      When the PaperMC repository is not reachable (e.g. in an isolated CI environment),
-      compile-time stubs located under src/main/java/com/velocitypowered/ are used instead.
-      Those stubs have the exact same package/class/method names as the real API and are
-      excluded from the final shaded jar via the maven-shade-plugin filter below.
-    -->
     <repositories>
         <repository>
             <id>papermc</id>
@@ -36,49 +26,11 @@
     </repositories>
 
     <dependencies>
-        <!--
-          Velocity API 3.5.0-SNAPSHOT – provided by the Velocity proxy at runtime.
-          Listed here for compilation; when PaperMC is reachable this resolves
-          the real JAR and the compile-time stubs are ignored (the real classes
-          take precedence on the classpath, but the shade filter always removes
-          the com/velocitypowered/ tree from the output jar anyway).
-        -->
+        <!-- Velocity API – provided by the Velocity proxy at runtime. -->
         <dependency>
             <groupId>com.velocitypowered</groupId>
             <artifactId>velocity-api</artifactId>
-            <version>3.5.0-SNAPSHOT</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <!--
-          Transitive provided dependencies – needed when the PaperMC repository
-          is NOT reachable and we fall back to the compile-time stubs.
-          When velocity-api resolves normally these are already pulled in
-          transitively and these entries are no-ops.
-        -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>5.1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-api</artifactId>
-            <version>4.16.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.kyori</groupId>
-            <artifactId>adventure-text-serializer-legacy</artifactId>
-            <version>4.16.0</version>
+            <version>3.3.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -99,9 +51,7 @@
 
     <build>
         <plugins>
-            <!-- Shade plugin: bundles H2 and night-config into the plugin jar.
-                 The compile-time Velocity API stubs are excluded so that only
-                 the plugin's own classes and the shaded libraries end up in the jar. -->
+            <!-- Shade plugin: bundles H2 and night-config into the plugin jar. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -114,15 +64,6 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <filters>
-                                <!-- Exclude the compile-time Velocity API stubs from the output jar. -->
-                                <filter>
-                                    <artifact>com.aochi:velolist</artifact>
-                                    <excludes>
-                                        <exclude>com/velocitypowered/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                             <relocations>
                                 <relocation>
                                     <pattern>org.h2</pattern>
@@ -143,12 +84,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                    <!-- The velocity-api annotation processor generates velocity-plugin.json
-                         from @Plugin when the PaperMC repo is reachable.  When it is not,
-                         we fall back to the hand-written src/main/resources/velocity-plugin.json.
-                         We disable the AP here so the build never fails due to AP resolution. -->
+                    <source>17</source>
+                    <target>17</target>
                     <proc>none</proc>
                 </configuration>
             </plugin>
